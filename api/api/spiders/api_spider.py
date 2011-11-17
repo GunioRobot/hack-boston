@@ -1,0 +1,30 @@
+from scrapy.contrib.spiders import CrawlSpider, Rule
+from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
+from scrapy.spider import BaseSpider
+from scrapy.selector import HtmlXPathSelector
+
+from api.items import ApiItem
+
+class apiSpider(CrawlSpider):
+    name = "programmableweb.com"
+    allowed_domains = ["programmableweb.com"]
+    start_urls = ["http://www.programmableweb.com/apis/directory/"]
+
+    rules = (
+        Rule(SgmlLinkExtractor(allow=('/api/.*?', )), callback='parse_item'),
+    )
+
+    def parse_item(self, response):
+        self.log('api %s' % response.url)
+        hxs = HtmlXPathSelector(response)
+        item = ApiItem()
+        item['heading'] = hxs.select('//h1/text()').extract()
+        item['description'] = hxs.select('/html/body/div[4]/div/div/div[2]/div[2]/div[2]/p/text()').extract()
+        item['summary'] = hxs.select('/html/body/div[4]/div/div/div[2]/div[4]/dl/dd').extract()
+        item['category'] = hxs.select('/html/body/div[4]/div/div/div[2]/div[4]/dl[2]/dd/a').extract()
+        item['tags'] = hxs.select('/html/body/div[4]/div/div/div[2]/div[4]/dl[3]/dd/a').extract()
+        item['protocol'] = hxs.select('/html/body/div[4]/div/div/div[2]/div[4]/dl[4]/dd/a').extract()
+        item['format'] = hxs.select('/html/body/div[4]/div/div/div[2]/div[4]/dl[5]/dd/a').extract()
+        item['homelink'] = hxs.select('/html/body/div[4]/div/div/div[2]/div[4]/dl[6]/dd/a/text()').extract()
+        return item
+

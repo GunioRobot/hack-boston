@@ -1,0 +1,12 @@
+from scrapy.spider import BaseSpider
+
+class apiSpider(BaseSpider):
+    name = "programmableweb.com"
+    allowed_domains = ["programmableweb.com"]
+    start_urls = [
+        "http://www.programmableweb.com/apis/directory/"
+    ]
+
+    def parse(self, response):
+        filename = response.url.split("/")[-2]
+        open(filename, 'wb').write(response.body)
